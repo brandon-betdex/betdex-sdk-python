@@ -94,7 +94,7 @@ while True:
 - Updates missed while disconnected aren't replayed; catch up on orders with `get_orders`
 - For raw frames, subclass `BaseListener` and override `on_data(raw)`
 
-## Price ladder
+## Execution
 
 ```python
 from betdex.execution import add_ticks, round_down_to_nearest_price
@@ -102,13 +102,3 @@ from betdex.execution import add_ticks, round_down_to_nearest_price
 round_down_to_nearest_price(5.55)    # 5.5
 add_ticks(1.99, 2)                   # 2.02
 ```
-
-## Good to know
-
-- `stake` is always the backer's stake, even on `Against` orders
-- `get_orders` needs a filter; `references` also needs `app_ids`
-- `get_orders`, `get_orders_settled` and `get_market_orders` cap pages at 500 rows; others at 2000
-- `get_wallet_positions` returns 25 rows unless you pass `size`
-- URLs over about 7,000 characters are rejected; split long id lists
-- `in_play_status` stays `InPlay` after a market settles; use `is_in_play`
-- The stream allows 10 connections and 500 subscriptions; use `"*"` for more markets
