@@ -36,6 +36,11 @@ class BetDexStream:
     :param timeout: Seconds to wait to connect, or for the authentication reply.
     :param keepalive: Seconds without a frame before sending a ping; ``None``
         never pings. The gateway closes connections idle for 10 minutes.
+
+    The API allows 10 connections and 500 active subscriptions per app, and 500
+    subscriptions a minute. Each id counts as one subscription, so subscribe to
+    ``"*"`` rather than to hundreds of markets one by one. The SDK doesn't
+    enforce these limits.
     """
 
     def __init__(
@@ -132,8 +137,9 @@ class BetDexStream:
         """
         Subscribe to updates of a type, sending now if connected.
 
-        Each id is confirmed by a ``SubscribeUpdate``; ids that match nothing are
-        confirmed too.
+        Each id is confirmed by a ``SubscribeUpdate``, and its updates start only
+        after that; ids that match nothing are confirmed too. Each id counts
+        towards the limit of 500 active subscriptions.
 
         :param subscription_type: What to receive.
         :param ids: Ids to receive it for, or ``["*"]`` for all.
@@ -190,9 +196,14 @@ class BetDexStream:
         """
         Subscribe to order changes (``OrderUpdate``).
 
-        :param ids: ``"{app_id}:{wallet_id}"`` for one app's orders in one wallet,
-            an app id or a wallet id for all of its orders, or ``"*"`` for every
-            order on the exchange (other apps' without wallet ids). Defaults to the
+        :param ids: Any of:
+
+            - ``"{app_id}:{wallet_id}"``: the app's orders in one of its wallets
+            - ``"{app_id}:*"``: all of the app's orders
+            - an order id: that order
+            - ``"*"``: every order on the exchange (other apps' without wallet ids)
+
+            Only the connection's own app id is accepted. Defaults to the
             connection's app and wallet.
         """
         if ids is None:
@@ -203,7 +214,8 @@ class BetDexStream:
         """
         Subscribe to balance changes (``WalletUpdate``).
 
-        :param wallet_ids: Wallets; defaults to the connection's wallet.
+        :param wallet_ids: Wallets owned by the app, or ``["*"]`` for all of them;
+            defaults to the connection's wallet.
         """
         self.subscribe("WalletUpdate", wallet_ids or [self.conn.resolve_wallet_id(None)])
 
