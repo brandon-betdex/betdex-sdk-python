@@ -107,7 +107,13 @@ class MarketStatusUpdate(BaseModel):
     """
     type: Literal["MarketStatusUpdate"]
     market_id: str
+    event_id: str
+    event_group_id: str
+    category_id: str
+    sub_category_id: str
     status: MarketStatus
+    published: bool
+    suspended: bool
     in_play_status: InPlayStatus
 
     @property
